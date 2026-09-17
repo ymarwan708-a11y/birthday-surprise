@@ -1,1 +1,538 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إلى أميرتي ❤️</title>
+    <!-- مكتبة الألعاب النارية (Confetti) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;700&display=swap');
+
+        :root {
+            --primary: #ff4d6d;
+            --secondary: #ff758f;
+            --dark: #2b0910;
+            --bg-gradient: linear-gradient(135deg, #0f0c20 0%, #2b0910 50%, #4a0e17 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-gradient);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        /* خلفية القلوب المتساقطة */
+        .hearts-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .heart-particle {
+            position: absolute;
+            color: rgba(255, 77, 109, 0.35);
+            font-size: 20px;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* الحاوية الرئيسية للمراحل */
+        .stage-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 600px;
+            padding: 25px 20px;
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        .stage {
+            display: none;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .stage.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 {
+            font-family: 'Amiri', serif;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #f1e3e6;
+            margin-bottom: 15px;
+        }
+
+        /* الأزرار والحقول */
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            text-align: center;
+            font-size: 1.1rem;
+            outline: none;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        input[type="password"]::placeholder {
+            color: #ddd;
+        }
+
+        .btn-custom {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-family: 'Cairo', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            width: calc(100% - 10px);
+            max-width: 280px;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 25px rgba(255, 77, 109, 0.6);
+        }
+
+        /* لعبة السؤال والمراوغة */
+        .btn-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            min-height: 60px;
+            margin-top: 15px;
+        }
+
+        #noBtn {
+            position: absolute;
+            transition: all 0.2s ease;
+        }
+
+        /* كروت الذكريات والعداد */
+        .memory-card {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border-right: 4px solid var(--primary);
+            text-align: right;
+            font-size: 0.95rem;
+        }
+
+        /* تصميم كروت البولاروايد */
+        .polaroid {
+            background: #ffffff;
+            padding: 8px 8px 22px 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 2;
+            width: 90px;
+            height: 110px;
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #ffd1dc;
+            display: block;
+        }
+
+        .side-polaroid {
+            width: 75px;
+            height: 95px;
+        }
+
+        .side-polaroid img {
+            height: 65px;
+        }
+
+        .decor-row {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            gap: 8px;
+        }
+
+        .message-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 15px 0;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 18px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-content h3 {
+            margin-top: 0;
+            color: #ff758f;
+            font-size: 1.2rem;
+        }
+
+        .message-content p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #ffe6eb;
+            margin-bottom: 0;
+        }
+
+        .rotate-left { transform: rotate(-6deg); }
+        .rotate-right { transform: rotate(6deg); }
+
+        .polaroid:hover {
+            transform: scale(1.15) rotate(0deg);
+            z-index: 10;
+        }
+
+        /* صندوق الهدايا والآلة الكاتبة */
+        .gift-box {
+            font-size: 80px;
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .typewriter-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.2rem;
+            color: #ffe6eb;
+            min-height: 80px;
+            line-height: 1.9;
+            white-space: pre-line; /* لضمان ظهور السطر الجديد بشكل دقيق */
+        }
+
+        /* عرض الفيديوهات */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsContainer"></div>
+
+<div class="stage-container">
+
+    <!-- المرحلة 0: الباسورد -->
+    <div class="stage active" id="stage0">
+        <h1>أهلاً بكِ في عالمكِ الخاص ❤️</h1>
+        <p>الموقع ده متصمم مخصوص عشان إنتي مش زي أي حد بالنسبة لي..</p>
+        <h3>اكتبي كلمة السر للبدء 🔑</h3>
+        <input type="password" id="pass" placeholder="كلمة السر">
+        <br>
+        <button class="btn-custom" onclick="checkPass()">دخول ✨</button>
+    </div>
+
+    <!-- المرحلة 1: لعبة السؤال والمراوغة -->
+    <div class="stage" id="stage1">
+        <h2>سؤال مهم جداً 🙈</h2>
+        <p>تفتكري مين أكتر شخص محظوظ في الدنيا دي كلها؟</p>
+        <div class="btn-wrapper">
+            <button class="btn-custom" style="width:auto;" onclick="nextStage(2)">أنا لأني معاك ❤️</button>
+            <button class="btn-custom" id="noBtn" style="width:auto;" onmouseover="moveButton()" onclick="moveButton()">أنت طبعاً 😜</button>
+        </div>
+    </div>
+
+    <!-- المرحلة 2: العداد الذكي وكلمات من القلب -->
+    <div class="stage" id="stage2">
+        <h2>لحظاتنا مع بعض ⏳</h2>
+        <p>كل ثانية وأنتِ في حياتي هي مكسب حقيقي:</p>
+        <div style="font-size: 1.2rem; color: var(--secondary); font-weight: bold; margin: 15px 0;" id="counter"></div>
+        <div class="memory-card">
+            💡 <b>افتكرة دايماً:</b> وجودك بيخلي أبسط الأيام أوقات استثنائية وبيدي لكل حاجة معنى جديد.
+        </div>
+        <button class="btn-custom" onclick="nextStage(3)">اقرأي الرسالة 💌</button>
+    </div>
+
+    <!-- المرحلة 3: الرسالة وصور البولاروايد -->
+    <div class="stage" id="stage3">
+        <!-- صور أعلى الرسالة -->
+        <div class="decor-row">
+            <div class="polaroid rotate-left"><img src="img1.jpg" alt="🌸"></div>
+            <div class="polaroid rotate-right"><img src="img2.jpg" alt="💖"></div>
+            <div class="polaroid rotate-left"><img src="img3.jpg" alt="✨"></div>
+        </div>
+
+        <!-- محتوى الرسالة -->
+        <div class="message-container">
+            <div class="polaroid side-polaroid rotate-right"><img src="img4.jpg" alt="👑"></div>
+            
+            <div class="message-content">
+                <h3>كل سنة وأنتِ طيبة ❤️</h3>
+                <p>كل سنه وانتي طيبه ي اجمل بنوته شوفتها ف حياتي كل سنة و أنتِ طيبة و بخير يا أجمل حد في الدنيا.
+حبّيت أقولك قد إيه وجودك في حياتي بيفرق معايا وبيخلي الأيام احلي ف عيني
+أنتِ الشخص اللي بكون معاه على طبيعتي وبطمن لوجوده، وضحكتك دايماً بتفرّح قلبي.
+بتمنالك سنة جديدة جميلة شبهك ، مليانة سعادة ونجاح وكل حاجة حلوة بتتمنيها.
+ربنا يديمك في حياتي وما يحرميش من وجودك ولا من حنيتك.. عيد ميلاد سعيد! ي كنوزتييي</p>
+            </div>
+
+            <div class="polaroid side-polaroid rotate-left"><img src="img5.jpg" alt="🌹"></div>
+        </div>
+
+        <!-- صور أسفل الرسالة -->
+        <div class="decor-row">
+            <div class="polaroid rotate-right"><img src="img6.jpg" alt="🎀"></div>
+            <div class="polaroid rotate-left"><img src="img7.jpg" alt="⭐"></div>
+            <div class="polaroid rotate-right"><img src="img8.jpg" alt="💌"></div>
+        </div>
+
+        <button class="btn-custom" onclick="nextStage(4)">افتحي الهدية 🎁</button>
+    </div>
+
+    <!-- المرحلة 4: صندوق الهدايا والسر -->
+    <div class="stage" id="stage4">
+        <h2>افتحي هديتك ❤️</h2>
+        <p>اضغطي على صندوق الهدايا لتكتشفي السر:</p>
+        <div class="gift-box" id="gift" onclick="openGift()">🎁</div>
+        <div class="typewriter-text" id="typewriter"></div>
+        <button class="btn-custom" id="finalBtn" style="display:none;" onclick="nextStage(5)">شوفي الفيديوهات ✨</button>
+    </div>
+
+    <!-- المرحلة 5: عرض الفيديوهات المدمجة -->
+    <div class="stage" id="stage5">
+        <h2>أحلي بنت عرفتها ف الفيديو 🎬</h2>
+        <div class="chat-container" id="chatBox"></div>
+        <button class="btn-custom" id="celebrateBtn" style="display:none;" onclick="nextStage(6)">الرسالة الأخيرة 🥳</button>
+    </div>
+
+    <!-- المرحلة 6: النتيجة والاحتفال النهائي -->
+    <div class="stage" id="stage6">
+        <h1>عيد ميلاد سعيد يا كل دنيتي 🎉</h1>
+        <p>أتمنى السنة دي تكون مليانة كل حاجة بتحبيها، وتحققي فيها كل أحلامك. أنا هفضل دايماً جنبك وبشجعك وبحبك بنفس الشغف وبأكتر كمان.</p>
+        <p style="font-size: 1.4rem; color: var(--secondary); font-family: 'Amiri', serif;">كل عام وأنتِ بطلة قصتي ❤️</p>
+        <button class="btn-custom" onclick="triggerMassiveConfetti()">احتفلي كمان مرة! 🥳</button>
+    </div>
+
+</div>
+
+<!-- ملف صوتي خلفية -->
+<audio id="bgMusic" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    // 1. تساقط القلوب
+    function createHearts() {
+        const container = id('heartsContainer');
+        for(let i = 0; i < 25; i++) {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-particle');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            heart.style.fontSize = (Math.random() * 15 + 15) + 'px';
+            container.appendChild(heart);
+        }
+    }
+    createHearts();
+
+    function id(elemId) { return document.getElementById(elemId); }
+
+    // 2. التحقق من كلمة السر
+    function checkPass() {
+        var pass = id('pass').value;
+        if(pass === "كنوزتييي") {
+            const audio = id('bgMusic');
+            audio.volume = 0.3;
+            audio.play().catch(() => console.log("تفاعل المستخدم مطلوب للتشغيل"));
+            
+            nextStage(1);
+        } else {
+            alert("كلمة السر خاطئة!");
+        }
+    }
+
+    // 3. التنقل بين المراحل
+    function nextStage(stageNum) {
+        document.querySelectorAll('.stage').forEach(el => el.classList.remove('active'));
+        id('stage' + stageNum).classList.add('active');
+        
+        if(stageNum === 5) {
+            startVideos();
+        } else if(stageNum === 6) {
+            triggerMassiveConfetti();
+        }
+    }
+
+    // 4. مراوغة زر الـ "لا"
+    function moveButton() {
+        const btn = id('noBtn');
+        const x = Math.random() * (window.innerWidth - 150) - (window.innerWidth / 2) + 50;
+        const y = Math.random() * (window.innerHeight - 100) - (window.innerHeight / 2) + 50;
+        btn.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    // 5. العداد الزمني (230 يومًا و17 ساعة و24 دقيقة و29 ثانية)
+    const targetDate = new Date();
+    targetDate.setDate(targetDate.getDate() - 230);
+    targetDate.setHours(targetDate.getHours() - 17);
+    targetDate.setMinutes(targetDate.getMinutes() - 24);
+    targetDate.setSeconds(targetDate.getSeconds() - 29);
+
+    function updateCounter() {
+        const now = new Date();
+        const diff = now - targetDate;
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        
+        id('counter').innerHTML = `${days} يومًا و ${hours} ساعة و ${minutes} دقيقة و ${seconds} ثانية ❤️`;
+    }
+    
+    updateCounter();
+    setInterval(updateCounter, 1000);
+
+    // 6. فتح صندوق الهدايا والكتابة التدريجية
+    const message = "انتي مش مجرد بنت دخلت حياتي انتي وجودك ف حياتي هو أكبر نعمه ربنا رزقني بيها و انتي الحاجه\nالحلوه ف حياتي و بتخلي ايامي احلي. بحبك دايماً وفي كل الأوقات ❤️";
+    let index = 0;
+
+    function openGift() {
+        id('gift').style.display = 'none';
+        typeWriter();
+        confetti({ particleCount: 50, spread: 60 });
+    }
+
+    function typeWriter() {
+        if (index < message.length) {
+            id('typewriter').innerHTML += message.charAt(index);
+            index++;
+            setTimeout(typeWriter, 50);
+        } else {
+            id('finalBtn').style.display = 'inline-block';
+        }
+    }
+
+    // 7. تشغيل الفيديوهات بالتتابع
+    function startVideos() {
+        const chatBox = id('chatBox');
+        if (chatBox.children.length === 0) {
+            playVid("video1.mp4", function() {
+                playVid("video2.mp4", function() {
+                    id('celebrateBtn').style.display = 'inline-block';
+                });
+            });
+        }
+    }
+
+    function playVid(src, onEnd) {
+        var box = id('chatBox');
+        var v = document.createElement('video');
+        v.src = src;
+        v.autoplay = true;
+        v.controls = true;
+        v.playsInline = true;
+        box.appendChild(v);
+        v.onended = onEnd;
+    }
+
+    // 8. الاحتفال بالألعاب النارية
+    function triggerMassiveConfetti() {
+        var duration = 3 * 1000;
+        var end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 }
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 }
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        })();
+    }
+</script>
+
+</body>
+</html>
